@@ -1,12 +1,9 @@
-import { NextResponse } from "next/server";
-
 import { createAccessToken } from "@/lib/auth";
+import { apiError, apiSuccess, optionsResponse } from "@/lib/cors";
 import { ExecuteQuery } from "@/lib/db";
 
 export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 204,
-  });
+  return optionsResponse();
 }
 
 export async function POST(request: Request) {
@@ -14,40 +11,33 @@ export async function POST(request: Request) {
     const { username, password } = await request.json();
 
     if (!username || !password) {
-      return NextResponse.json(
-        {
-          Sonuc: "hata",
-          message: "Kullanici adi ve sifre zorunlu.",
-        },
-        { status: 400 },
+      return apiError(
+        "Kullanici adi ve sifre zorunlu.",
+        400,
+        "VALIDATION_ERROR",
       );
     }
 
     const [sonuc] = await ExecuteQuery(
-      "[LoginKontrol] '" + username + "', '" + password + "'",
+      "EXEC [LoginKontrol] @username, @password",
+      [
+        { name: "username", type: "NVarChar", value: String(username) },
+        { name: "password", type: "NVarChar", value: String(password) },
+      ],
     );
 
     console.log("auth POST sonuc", sonuc);
 
-    if (!sonuc || sonuc.Sonuc !== "1") {
-      return NextResponse.json(sonuc ?? { Sonuc: "0" });
-    }
+    if (!sonuc || sonuc.Sonuc != "1") {
+      return apiError("Kullanici adi veya sifre hatali.", 401, "UNAUTHORIZED");
+    } 
 
     const token = await createAccessToken(sonuc);
+    const { Sonuc, ...userData } = sonuc;
 
-    return NextResponse.json({
-      ...sonuc,
-      token,
-    });
+    return apiSuccess({ ...userData, token });
   } catch (error) {
     console.error("auth POST error:", error);
-
-    return NextResponse.json(
-      {
-        Sonuc: "hata",
-        message: "Sunucu hatasi",
-      },
-      { status: 500 },
-    );
+    return apiError("Sunucu hatasi.", 500, "SERVER_ERROR");
   }
 }

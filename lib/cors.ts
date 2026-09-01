@@ -1,3 +1,4 @@
+import { ApiErrorCode, ApiResponse } from "@/types/api";
 import { NextResponse } from "next/server";
 
 export const corsHeaders = {
@@ -18,4 +19,22 @@ export function jsonResponse(data: unknown, status = 200) {
     status,
     headers: corsHeaders,
   });
+}
+
+export function apiSuccess<T>(data: T, status = 200) {
+  const body: ApiResponse<T> = { success: true, data };
+  return jsonResponse(body, status);
+}
+
+export function apiError(
+  message: string,
+  status = 400,
+  code?: ApiErrorCode,
+  details?: unknown,
+) {
+  const body: ApiResponse<never> = {
+    success: false,
+    error: { message, code, details },
+  };
+  return jsonResponse(body, status);
 }
