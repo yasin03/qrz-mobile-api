@@ -7,4 +7,5 @@ export type User = {
   IDSube: string | null;
   IDSubePersonel: string | null;
   IDKullanici: string;
+  IDDevice: string;
 };

@@ -7,6 +7,7 @@ export type AuthUser = {
   IDSirket: string | null;
   IDSube: string | null;
   IDSubePersonel: string | null;
+  IDDevice: string | null;
 };
 
 export async function requireAuth(request: Request) {
@@ -49,6 +50,7 @@ export async function requireAuth(request: Request) {
     IDSubePersonel: payload.IDSubePersonel
       ? String(payload.IDSubePersonel)
       : null,
+    IDDevice: payload.IDDevice ? String(payload.IDDevice) : null,
   };
 
   return {

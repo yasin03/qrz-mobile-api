@@ -18,6 +18,7 @@ export async function createAccessToken(user: User) {
     IDSirket: user.IDSirket,
     IDSube: user.IDSube,
     IDSubePersonel: user.IDSubePersonel,
+    IDDevice: user.IDDevice,
   })
     .setProtectedHeader({
       alg: "HS256",
