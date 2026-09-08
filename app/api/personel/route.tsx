@@ -2,11 +2,9 @@ import { ExecuteQuery } from "@/lib/db";
 import { requireAuth } from "@/lib/require-auth";
 import { apiError, apiSuccess, optionsResponse } from "@/lib/cors";
 
-const ALLOWED_USER_TYPES = ["1", "2", "3"];
-
 const queryTypes = {
-  INSERT_PDKS: (params: any) =>
-    `[SubePersonelSaat_InsertMobil] '${params.IDSubePersonel}','${params.JsonData}'`,
+  GET_PERSONEL_DETAY: (params: any) =>
+    `[SubePersonel_SELECTByIDSubePersonel] '${params.IDSubePersonel}'`,
 };
 
 export async function OPTIONS() {
@@ -23,20 +21,12 @@ export async function POST(request: Request) {
         "UNAUTHORIZED",
       );
     }
-    if (!ALLOWED_USER_TYPES.includes(auth.user.IDKullaniciTip)) {
-      return apiError("Bu islem icin yetkiniz yok.", 403, "FORBIDDEN");
-    }
 
-    const { type, params } = await request.json();
+    const payload = await request.json();
+    const { type } = payload;
 
-    if (!type || !params) {
-      return apiError("type ve params zorunlu.", 400, "VALIDATION_ERROR");
-    }
-
-    const customParams = {
-      IDSubePersonel: auth.user.IDSubePersonel,
-      JsonData: JSON.stringify(params.jsonData),
-      ...params,
+    const params = {
+      IDSubePersonel: payload.IDSubePersonel,
     };
 
     const queryFunction = queryTypes[type as keyof typeof queryTypes];
@@ -45,7 +35,7 @@ export async function POST(request: Request) {
       return apiError("Gecersiz sorgu tipi.", 400);
     }
 
-    const query = queryFunction(customParams);
+    const query = queryFunction(params);
     const result = await ExecuteQuery(query);
 
     return apiSuccess(result);
