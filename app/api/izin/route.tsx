@@ -2,11 +2,15 @@ import { ExecuteQuery } from "@/lib/db";
 import { requireAuth } from "@/lib/require-auth";
 import { apiError, apiSuccess, optionsResponse } from "@/lib/cors";
 
+const ALLOWED_USER_TYPES = ["1", "2", "3"];
+
 const queryTypes = {
-  GET_PERSONEL_DETAY: (params: any) =>
-    `[SubePersonel_SELECTByIDSubePersonel] '${params.IDSubePersonel}'`,
-  SELECT_PERSONEL_LIST: (params: any) =>
-    `[SubePersonel_SELECTByIDSube3] '${params.IDSube}', '${params.TcKimlikNo}','${params.Adi}','${params.Yil}','${params.Ay}'`,
+  SELECT_IZIN: (params: any) =>
+    `[IzinGenel_SELECTByIDSubePersonel] '${params.IDSube}','${params.IDSubePersonel}','${params.BaslangicTarihi}','${params.BitisTarihi}','${params.Aciklama}'`,
+  INSERT_IZIN: (params: any) =>
+    `[IzinGenel_Insert] '${params.IDSubePersonel}','${params.BaslangicTarihi}','${params.BitisTarihi}','${params.Aciklama}','${params.Gun}','${params.AitOlduguYil}','${params.CizelgeDurum}'`,
+  DELETE_IZIN: (params: any) =>
+    `[IzinGenel_DELETEByIDIzinGenel] '${params.IDIzinGenel}'`,
 };
 
 export async function OPTIONS() {
@@ -23,16 +27,23 @@ export async function POST(request: Request) {
         "UNAUTHORIZED",
       );
     }
+    if (!ALLOWED_USER_TYPES.includes(auth.user.IDKullaniciTip)) {
+      return apiError("Bu islem icin yetkiniz yok.", 403, "FORBIDDEN");
+    }
 
     const payload = await request.json();
     const { type } = payload;
 
     const params = {
+      IDIzinGenel: payload.IDIzinGenel,
       IDSubePersonel: payload.IDSubePersonel,
-      TcKimlikNo: "",
-      Adi: "",
-      Yil: payload.Yil,
-      Ay: payload.Ay,
+      IDSube: payload.IDSube,
+      BaslangicTarihi: payload.BaslangicTarihi,
+      BitisTarihi: payload.BitisTarihi,
+      Aciklama: payload.Aciklama,
+      Gun: payload.Gun,
+      AitOlduguYil: payload.AitOlduguYil,
+      CizelgeDurum: payload.CizelgeDurum,
     };
 
     const queryFunction = queryTypes[type as keyof typeof queryTypes];
@@ -43,7 +54,6 @@ export async function POST(request: Request) {
 
     const query = queryFunction(params);
     const result = await ExecuteQuery(query);
-
     return apiSuccess(result);
   } catch (error) {
     console.error("lokasyon POST error:", error);
