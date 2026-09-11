@@ -23,8 +23,6 @@ export async function POST(request: Request) {
       `[LoginKontrolMobil] '${username}', '${password}', '${idDevice}'`,
     );
 
-    console.log("auth POST sonuc", sonuc);
-
     if (!sonuc) {
       return apiError("Sunucu hatasi.", 500, "SERVER_ERROR");
     }

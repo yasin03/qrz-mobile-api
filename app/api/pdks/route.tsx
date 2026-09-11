@@ -5,6 +5,9 @@ import { apiError, apiSuccess, optionsResponse } from "@/lib/cors";
 const ALLOWED_USER_TYPES = ["1", "2", "3"];
 
 const queryTypes = {
+  SELECT_PDKS: (params: any) =>
+    `[SubePersonelSaat_SelectByIDSubePersonel] '${params.IDSubePersonel}','${params.Tarih1}','${params.Tarih2}'`,
+
   INSERT_PDKS: (params: any) =>
     `[SubePersonelSaat_InsertMobil] '${params.IDSubePersonel}','${params.JsonData}'`,
 };
