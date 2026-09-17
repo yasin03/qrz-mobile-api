@@ -18,10 +18,10 @@ export async function POST(request: Request) {
         "VALIDATION_ERROR",
       );
     }
-
-    const [sonuc] = await ExecuteQuery(
-      `[LoginKontrolMobil] '${username}', '${password}', '${idDevice}'`,
-    );
+    const sorgu = `[LoginKontrolMobil] '${username}', '${password}', '${idDevice}'`;
+    const [sonuc] = await ExecuteQuery(sorgu);
+    console.log(sorgu);
+    console.log(sonuc);
 
     if (!sonuc) {
       return apiError("Sunucu hatasi.", 500, "SERVER_ERROR");
@@ -54,7 +54,6 @@ export async function POST(request: Request) {
       case "1": {
         const token = await createAccessToken(sonuc);
         const { Sonuc, Aciklama, ...userData } = sonuc;
-
         return apiSuccess({
           ...userData,
           token,
